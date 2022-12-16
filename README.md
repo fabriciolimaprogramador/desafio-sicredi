@@ -113,6 +113,10 @@ BODY:
 }
 
 
+-------------------------------------------------------------------------------------------------------------------
+Tarefa Bônus 1 - Integração com sistemas externos
+Foi implementado mas, o código está comentado.
+Fui tentar consumir a URL https://user-info.herokuapp.com/users/{cpf} porque ela estava fora ar.
 
 -------------------------------------------------------------------------------------------------------------------
 Tarefa Bônus 4 - Versionamento da API
