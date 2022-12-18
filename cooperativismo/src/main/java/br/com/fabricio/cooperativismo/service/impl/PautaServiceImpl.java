@@ -16,6 +16,7 @@ import br.com.fabricio.cooperativismo.controller.response.ResultadoVotacaoRespon
 import br.com.fabricio.cooperativismo.controller.response.SessaoResponse;
 import br.com.fabricio.cooperativismo.controller.response.VotoResponse;
 import br.com.fabricio.cooperativismo.exceptions.AssociadoNotFoundException;
+import br.com.fabricio.cooperativismo.exceptions.PautaNaoLocalizadaException;
 import br.com.fabricio.cooperativismo.repository.AssociadoRepository;
 import br.com.fabricio.cooperativismo.repository.PautaRepository;
 import br.com.fabricio.cooperativismo.repository.SessaoRepository;
@@ -51,6 +52,26 @@ public class PautaServiceImpl implements PautaService {
 		PautaEntity pautaEntity = PautaMapper.toEntity(pautaRequest);
 		PautaEntity pautaSalvo = pautaRepository.save(pautaEntity);
 		return PautaMapper.toResponse(pautaSalvo);
+	}
+	
+	@Override
+	@Transactional
+	public SessaoResponse abrirSesscao(Long idPauta) throws PautaNaoLocalizadaException {
+
+		Optional<PautaEntity> pauta = pautaRepository.findById(idPauta);
+		if (pauta.isEmpty()) {
+			throw new PautaNaoLocalizadaException("Pauta não encontrada");
+		}
+
+		PautaEntity pautaEntity = pauta.get();
+		pautaEntity.setAbertura(LocalDateTime.now());
+		pautaEntity.setFechamento(pautaEntity.getAbertura().plusMinutes(tempoFechamentoSessao));
+		pautaRepository.save(pautaEntity);
+
+		SessaoResponse sessaoResponse = new SessaoResponse();
+		sessaoResponse.setStatus("Sessão aberta " + DataHoraUtil.format(pautaEntity.getAbertura()));
+		return sessaoResponse;
+
 	}
 
 	@Override
@@ -123,25 +144,7 @@ public class PautaServiceImpl implements PautaService {
 
 	}
 
-	@Override
-	@Transactional
-	public SessaoResponse abrirSesscao(Long idPauta) throws Exception {
-
-		Optional<PautaEntity> pauta = pautaRepository.findById(idPauta);
-		if (pauta.isEmpty()) {
-			throw new Exception("Pauta não encontrada");
-		}
-
-		PautaEntity pautaEntity = pauta.get();
-		pautaEntity.setAbertura(LocalDateTime.now());
-		pautaEntity.setFechamento(pautaEntity.getAbertura().plusMinutes(tempoFechamentoSessao));
-		pautaRepository.save(pautaEntity);
-
-		SessaoResponse sessaoResponse = new SessaoResponse();
-		sessaoResponse.setStatus("Sessão aberta " + DataHoraUtil.format(pautaEntity.getAbertura()));
-		return sessaoResponse;
-
-	}
+	
 
 	private boolean sessaoFechada(PautaEntity pautaEntity) throws Exception {
 		return LocalDateTime.now().isAfter(pautaEntity.getFechamento());

@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.com.fabricio.cooperativismo.controller.request.AssociadoRequest;
 import br.com.fabricio.cooperativismo.controller.response.AssociadoResponse;
+import br.com.fabricio.cooperativismo.exceptions.AssociadoJaCadastradoException;
 import br.com.fabricio.cooperativismo.exceptions.AssociadoNotFoundException;
 import br.com.fabricio.cooperativismo.repository.AssociadoRepository;
 import br.com.fabricio.cooperativismo.repository.entity.AssociadoEntity;
@@ -22,11 +23,11 @@ public class AssociadoServiceImpl implements AssociadoService {
 
 	@Override
 	@Transactional
-	public AssociadoResponse insert(AssociadoRequest associadoRequest) throws Exception {
+	public AssociadoResponse insert(AssociadoRequest associadoRequest)  {
 
 		AssociadoEntity associadoEntity = associadoRepository.findByCpf(associadoRequest.getCpf());
 		if (associadoEntity != null) {
-			throw new Exception("Associado já cadastrado");
+			throw new AssociadoJaCadastradoException("Associado já cadastrado");
 		}
 
 		associadoEntity = AssociadoMapper.toEntity(associadoRequest);
